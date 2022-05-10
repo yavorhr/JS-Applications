@@ -27,7 +27,7 @@ In the [JS Applications](https://softuni.bg/trainings/3488/js-applications-octob
 - Modular Applications
 - Workshop: End-to-End Application
 - Workshop: Web Components
-- 
+
 - ![JS Applications - February 2022 - Certificate](https://user-images.githubusercontent.com/76119513/167642399-64de3c3f-6d18-451e-b799-1780532e908c.jpeg)
 
 
