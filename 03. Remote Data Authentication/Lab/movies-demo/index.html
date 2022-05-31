@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Best movies</h1>
+
+    <section class="register-section">
+        <h3>Register</h3>
+        <form id="register-form">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email">
+            <label for="password">Password</label>
+            <input type="text" id="password" name="password">
+            <input type="submit" value="register">
+        </form>
+    </section>
+
+    <section class="login-section">
+        <h3>Login</h3>
+        <form id="login-form">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email">
+            <label for="password">Password</label>
+            <input type="text" id="password" name="password">
+            <input type="submit" value="Login">
+        </form>
+    </section>
+
+    <section class="add-movie-section hide">
+        <h3>Add movie</h3>
+        <form id="add-movie">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title">
+            <label for="description">Description</label>
+            <textarea name="description" id="description"></textarea>
+            <label for="image-url">Image url</label>
+            <input type="text" name="image-url">
+            <input type="submit" value="Add movie">
+        </form>
+    </section>
+
+    <section class="all-movies">
+        <button id="show-all-movies">Show movies</button>
+
+        <div id="movie-list" class="hide">Movie List</div>
+    </section>
+
+    <script>
+        // --- REGISTER ---
+        //1. Target the register form
+        //2. Stop the preventDefault() of the form
+        //3. FormData to obtain the user input fields
+        //4. Make fetch() with post method to the server url
+        //5. Save token to localStorage from the response from the fetch() AJAX
+
+        // --- LOGIN ---
+        // Uses the same logic as the Register.
+
+        // --- ADD MOVIE WITH TOKEN ---
+        //1. Create and target <form> from HTML
+        //2. FormData to obatain movie name and title
+        //3. Fetch() wit X-Authorziation header
+
+        // --- SHOW ALL MOVIES
+        //1. ShowMovie button add eventListener();
+        //2. Get fetch() to the Server. No authorization header is needed
+        //3. Create DOM elements and append them
+        //4. Add images to the movies 
+
+        //1. REGISTER
+        let registerForm = document.getElementById('register-form');
+        let loginForm = document.getElementById('login-form');
+        let movieForm = document.getElementById('add-movie');
+
+        let baseUrl = "http://localhost:3030";
+        let registerSection = document.querySelector('.register-section');
+        let loginSection = document.querySelector('.login-section');
+        let addMovieSection = document.querySelector('.add-movie-section');
+        let showMoviesButton = document.querySelector('#show-all-movies');
+        let movieList = document.querySelector('#movie-list');
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let formData = new FormData(registerForm);
+
+            fetch(`${baseUrl}/users/register`, {
+                method: 'Post',
+                headers: { 'Content-type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    saveToken(data.accessToken)
+                    registerSection.classList.add('hide');
+                    addMovieSection.classList.remove('hide');
+                })
+                .catch(err => console.log(err))
+
+            e.currentTarget.reset();
+        })
+
+        // LOGIN 
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let formData = new FormData(loginForm);
+
+            fetch(`${baseUrl}/users/login`, {
+                method: 'Post',
+                headers: { 'Content-type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    saveToken(data.accessToken)
+                    loginSection.classList.add('hide');
+                    registerSection.classList.add('hide');
+                    addMovieSection.classList.remove('hide');
+                })
+                .catch(err => console.log(err))
+
+            e.currentTarget.reset();
+        })
+
+        // ADD MOVIE
+        movieForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let formData = new FormData(e.currentTarget);
+
+            let title = formData.get('title');
+            let description = formData.get('description');
+            let imageUrl = formData.get('image-url');
+
+            let token = getToken();
+
+            fetch(`${baseUrl}/data/movies`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': token
+                }, body: JSON.stringify({
+                    title,
+                    description,
+                    imageUrl
+                }),
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.log('There is a problem with movie creation'));
+
+            e.currentTarget.reset();
+        });
+
+        showMoviesButton.addEventListener('click', () => {
+            fetch(`${baseUrl}/data/movies`)
+                .then(response => response.json())
+                .then(movies => {
+                    movies.forEach(movie => {
+                        let movieElement = document.createElement('article');
+
+                        let headerElement = document.createElement('header');
+                        headerElement.textContent = movie.title;
+                        movieElement.appendChild(headerElement);
+
+                        let contentElement = document.createElement('p');
+                        contentElement.textContent = movie.description;
+                        movieElement.appendChild(contentElement);
+
+                        let imageElement = document.createElement('img');
+                        imageElement.setAttribute('src', movie.imageUrl);
+                        movieElement.appendChild(imageElement);
+
+                        movieList.appendChild(movieElement);
+                    })
+                })
+            movieList.classList.remove('hide');
+        });
+
+
+        function saveToken(token) {
+            localStorage.setItem('auth_token', token)
+        };
+
+        function getToken() {
+            let token = localStorage.getItem('auth_token');
+            return token;
+        };
+
+    </script>
+</body>
+
+</html>
