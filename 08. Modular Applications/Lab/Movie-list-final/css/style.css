@@ -1,0 +1,21 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.login-container{
+    width: 400px;
+}
+
+.site-wrapper{
+    width: 1200px;
+    margin:auto
+}
+
+.movie-list{
+    display: flex;
+    list-style: none;
+}
+
+.movie-list-item{
+    margin-right: 10px;
+}
